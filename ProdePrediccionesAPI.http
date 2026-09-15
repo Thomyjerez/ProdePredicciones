@@ -1,0 +1,6 @@
+@ProdePrediccionesAPI_HostAddress = http://localhost:5239
+
+GET {{ProdePrediccionesAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
