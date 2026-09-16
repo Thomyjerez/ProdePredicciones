@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ProdePrediccionesAPI.Models
 {
     public class Prediccion
@@ -10,7 +12,10 @@ namespace ProdePrediccionesAPI.Models
         public int PartidoId { get; set; }
         public Partido? Partido { get; set; }
 
+        [Range(0, 50, ErrorMessage = "Los goles no pueden ser negativos ni mayores a 50.")]
         public int GolesLocalPredichos { get; set; }
+
+        [Range(0, 50, ErrorMessage = "Los goles no pueden ser negativos ni mayores a 50.")]
         public int GolesVisitantePredichos { get; set; }
 
         public int PuntosObtenidos { get; set; } = 0;

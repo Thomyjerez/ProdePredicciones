@@ -28,6 +28,37 @@ namespace ProdePrediccionesAPI.Controllers
                 .ToListAsync();
         }
 
+[HttpGet("usuario/{usuarioId}")]
+public async Task<ActionResult<IEnumerable<object>>> GetPrediccionesByUsuario(int usuarioId)
+{
+    var predicciones = await _context.Predicciones
+        .Where(p => p.UsuarioId == usuarioId)
+        .Include(p => p.Partido)
+            .ThenInclude(pa => pa!.EquipoLocal)
+        .Include(p => p.Partido)
+            .ThenInclude(pa => pa!.EquipoVisitante)
+        // Usamos Select para devolver un JSON "limpio" y fácil de leer para el frontend
+        .Select(p => new {
+            PrediccionId = p.Id,
+            Partido = $"{p.Partido!.EquipoLocal!.Nombre} vs {p.Partido.EquipoVisitante!.Nombre}",
+            TuPronostico = $"{p.GolesLocalPredichos} - {p.GolesVisitantePredichos}",
+            ResultadoReal = p.Partido.Estado == "Finalizado" 
+                ? $"{p.Partido.GolesLocal} - {p.Partido.GolesVisitante}" 
+                : "Pendiente",
+            PuntosGanados = p.PuntosObtenidos,
+            FechaApuesta = p.FechaPredicion
+        })
+        .OrderByDescending(p => p.FechaApuesta)
+        .ToListAsync();
+
+    if (!predicciones.Any())
+    {
+        return NotFound("Este usuario todavía no hizo ninguna predicción.");
+    }
+
+    return Ok(predicciones);
+}
+
 
 [HttpPost]
 public async Task<ActionResult<Prediccion>> PostPrediccion(Prediccion prediccion)
