@@ -105,3 +105,4 @@ E:\ProyectosPortfolio\ProdePrediccionesAPI\obj\Debug\net9.0\refint\ProdePredicci
 E:\ProyectosPortfolio\ProdePrediccionesAPI\obj\Debug\net9.0\ProdePrediccionesAPI.pdb
 E:\ProyectosPortfolio\ProdePrediccionesAPI\obj\Debug\net9.0\ProdePrediccionesAPI.genruntimeconfig.cache
 E:\ProyectosPortfolio\ProdePrediccionesAPI\obj\Debug\net9.0\ref\ProdePrediccionesAPI.dll
+E:\ProyectosPortfolio\ProdePrediccionesAPI\obj\Debug\net9.0\ProdePrediccionesAPI.sourcelink.json

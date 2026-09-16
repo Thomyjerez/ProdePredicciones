@@ -12,6 +12,7 @@ namespace ProdePrediccionesAPI.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Equipo> Equipos { get; set; }
         public DbSet<Partido> Partidos { get; set; }
+        public DbSet<Prediccion> Predicciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,18 @@ namespace ProdePrediccionesAPI.Data
                 .WithMany()
                 .HasForeignKey(p => p.EquipoVisitanteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<Prediccion>()
+    .HasOne(p => p.Usuario)
+    .WithMany()
+    .HasForeignKey(p => p.UsuarioId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+modelBuilder.Entity<Prediccion>()
+    .HasOne(p => p.Partido)
+    .WithMany()
+    .HasForeignKey(p => p.PartidoId)
+    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
