@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prode - Posiciones</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .ranking-box { background: white; padding: 20px; border-radius: 8px; max-width: 400px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        li { font-size: 18px; margin-bottom: 10px; padding: 10px; background: #eef; border-radius: 4px; list-style-type: none; }
+        ul { padding: 0; }
+    </style>
+</head>
+<body>
+    <div class="ranking-box">
+        <h1>🏆 Tabla de Posiciones</h1>
+        <ul id="lista-ranking">
+            <li>Cargando datos desde la API...</li>
+        </ul>
+    </div>
+
+    <script>
+        // Si tu puerto es distinto a 5239, cambialo acá abajo:
+        fetch('http://localhost:5239/api/Usuarios/ranking')
+            .then(response => response.json())
+            .then(data => {
+                const lista = document.getElementById('lista-ranking');
+                lista.innerHTML = ''; // Limpiamos el texto de carga
+                
+                data.forEach((user, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>#${index + 1} ${user.nombre}</strong> - ${user.puntosTotales} pts`;
+                    lista.appendChild(li);
+                });
+            })
+            .catch(error => {
+                document.getElementById('lista-ranking').innerHTML = '<li style="color:red;">Error al conectar con la API. ¿Está corriendo?</li>';
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>
