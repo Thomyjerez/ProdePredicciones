@@ -63,6 +63,15 @@ public async Task<ActionResult<IEnumerable<object>>> GetPrediccionesByUsuario(in
 [HttpPost]
 public async Task<ActionResult<Prediccion>> PostPrediccion(Prediccion prediccion)
 {
+    var usuarioIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UsuarioId")?.Value;
+    
+    if (string.IsNullOrEmpty(usuarioIdClaim) || !int.TryParse(usuarioIdClaim, out int usuarioIdToken))
+    {
+        return Unauthorized("Sesión inválida. Por favor, volvé a iniciar sesión.");
+    }
+
+    prediccion.UsuarioId = usuarioIdToken;
+
     var partido = await _context.Partidos.FindAsync(prediccion.PartidoId);
     if (partido == null)
     {
