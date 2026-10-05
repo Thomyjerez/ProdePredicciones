@@ -34,6 +34,77 @@ public async Task<ActionResult<IEnumerable<Partido>>> GetPartidos()
             return Ok(partido);
         }
 
+        [HttpPut("{id}")]
+public async Task<IActionResult> PutPartido(int id, Partido partidoActualizado)
+{
+    
+    if (id != partidoActualizado.Id)
+    {
+        return BadRequest("El ID de la URL no coincide con el del cuerpo.");
+    }
+
+    var partidoDB = await _context.Partidos.FindAsync(id);
+    if (partidoDB == null)
+    {
+        return NotFound("El partido no existe en la base de datos.");
+    }
+
+    if (partidoDB.Estado == "Finalizado")
+    {
+        return BadRequest("Este partido ya fue finalizado y los puntos ya se repartieron.");
+    }
+
+    partidoDB.GolesLocal = partidoActualizado.GolesLocal;
+    partidoDB.GolesVisitante = partidoActualizado.GolesVisitante;
+    partidoDB.Estado = "Finalizado";
+
+    var predicciones = await _context.Predicciones
+        .Include(p => p.Usuario)
+        .Where(p => p.PartidoId == id)
+        .ToListAsync();
+
+
+    foreach (var pred in predicciones)
+    {
+        int puntos = 0;
+        
+        bool aciertoExacto = pred.GolesLocalPredichos == partidoDB.GolesLocal && 
+                             pred.GolesVisitantePredichos == partidoDB.GolesVisitante;
+
+        bool ganoLocalReal = partidoDB.GolesLocal > partidoDB.GolesVisitante;
+        bool ganoVisitaReal = partidoDB.GolesVisitante > partidoDB.GolesLocal;
+        bool empateReal = partidoDB.GolesLocal == partidoDB.GolesVisitante;
+
+        bool predijoLocal = pred.GolesLocalPredichos > pred.GolesVisitantePredichos;
+        bool predijoVisita = pred.GolesVisitantePredichos > pred.GolesLocalPredichos;
+        bool predijoEmpate = pred.GolesLocalPredichos == pred.GolesVisitantePredichos;
+
+        bool aciertoTendencia = (ganoLocalReal && predijoLocal) || 
+                                (ganoVisitaReal && predijoVisita) || 
+                                (empateReal && predijoEmpate);
+
+        if (aciertoExacto)
+        {
+            puntos = 3; 
+        }
+        else if (aciertoTendencia)
+        {
+            puntos = 1; 
+        }
+
+        pred.PuntosObtenidos = puntos;
+        
+        if (pred.Usuario != null)
+        {
+            pred.Usuario.PuntosTotales += puntos;
+        }
+    }
+
+    await _context.SaveChangesAsync();
+
+    return Ok(partidoDB);
+}
+
         [HttpPut("{id}/resultado")]
         public async Task<IActionResult> ActualizarResultado(int id, [FromBody] Partido partidoActualizado)
         {
