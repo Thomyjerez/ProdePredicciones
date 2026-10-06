@@ -105,6 +105,24 @@ public async Task<IActionResult> PutPartido(int id, Partido partidoActualizado)
     return Ok(partidoDB);
 }
 
+[HttpDelete("{id}")]
+public async Task<IActionResult> DeletePartido(int id)
+{
+    var partido = await _context.Partidos.FindAsync(id);
+    if (partido == null)
+    {
+        return NotFound("El partido no existe.");
+    }
+
+    var prediccionesAsociadas = _context.Predicciones.Where(p => p.PartidoId == id);
+    _context.Predicciones.RemoveRange(prediccionesAsociadas);
+
+    _context.Partidos.Remove(partido);
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "Partido y predicciones asociadas eliminados correctamente." });
+}
+
         [HttpPut("{id}/resultado")]
         public async Task<IActionResult> ActualizarResultado(int id, [FromBody] Partido partidoActualizado)
         {

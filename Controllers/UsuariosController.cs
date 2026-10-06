@@ -48,5 +48,25 @@ public async Task<ActionResult<IEnumerable<object>>> GetRanking()
 
     return Ok(ranking);
 }
+
+[HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUsuario(int id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null)
+            {
+                return NotFound("El usuario no existe.");
+            }
+
+            var prediccionesDelUsuario = _context.Predicciones.Where(p => p.UsuarioId == id);
+            _context.Predicciones.RemoveRange(prediccionesDelUsuario);
+
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Usuario y sus predicciones eliminados correctamente." });
+        }
     }
+
 }
+
