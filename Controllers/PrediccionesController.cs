@@ -28,6 +28,79 @@ namespace ProdePrediccionesAPI.Controllers
                 .ToListAsync();
         }
 
+        [HttpGet("mis-predicciones")]
+        public async Task<ActionResult<IEnumerable<object>>> GetMisPredicciones([FromQuery] string? nombreUsuario = null)
+        {
+            int usuarioId = 0;
+            var claimId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("id")?.Value
+                       ?? User.FindFirst("usuarioId")?.Value
+                       ?? User.FindFirst("sub")?.Value;
+
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int parsedId))
+            {
+                usuarioId = parsedId;
+            }
+
+            if (usuarioId == 0 && Request.Headers.TryGetValue("Authorization", out var authHeader))
+            {
+                var tokenStr = authHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase).Trim();
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                
+                if (handler.CanReadToken(tokenStr))
+                {
+                    var jwt = handler.ReadJwtToken(tokenStr);
+                    var idEnToken = jwt.Claims.FirstOrDefault(c => 
+                        (c.Type.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase) || 
+                         c.Type == "id" || c.Type == "sub" || c.Type == "usuarioId") 
+                        && int.TryParse(c.Value, out _))?.Value;
+
+                    if (!string.IsNullOrEmpty(idEnToken))
+                    {
+                        usuarioId = int.Parse(idEnToken);
+                    }
+                    else
+                    {
+                        var nombreEnToken = jwt.Claims.FirstOrDefault(c => 
+                            c.Type.EndsWith("name", StringComparison.OrdinalIgnoreCase) || 
+                            c.Type == "unique_name" || c.Type == "sub")?.Value;
+
+                        if (!string.IsNullOrEmpty(nombreEnToken))
+                        {
+                            var userDb = await _context.Usuarios
+                                .FirstOrDefaultAsync(u => u.Nombre.ToLower() == nombreEnToken.ToLower());
+                            if (userDb != null) usuarioId = userDb.Id;
+                        }
+                    }
+                }
+            }
+
+            if (usuarioId == 0 && !string.IsNullOrEmpty(nombreUsuario))
+            {
+                var userDb = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Nombre.ToLower() == nombreUsuario.ToLower());
+                if (userDb != null) usuarioId = userDb.Id;
+            }
+
+            if (usuarioId == 0)
+            {
+                return Ok(new List<object>());
+            }
+
+            var misPredicciones = await _context.Predicciones
+                .Where(p => p.UsuarioId == usuarioId)
+                .Select(p => new {
+                    p.Id,
+                    p.PartidoId,
+                    p.GolesLocalPredichos,
+                    p.GolesVisitantePredichos,
+                    p.PuntosObtenidos
+                })
+                .ToListAsync();
+
+            return Ok(misPredicciones);
+        }
+
 [HttpGet("usuario/{usuarioId}")]
 public async Task<ActionResult<IEnumerable<object>>> GetPrediccionesByUsuario(int usuarioId)
 {

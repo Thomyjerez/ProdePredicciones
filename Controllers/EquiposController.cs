@@ -71,5 +71,26 @@ namespace ProdePrediccionesAPI.Controllers
                 return StatusCode(500, new { message = $"Error al comunicarse con la API externa: {ex.Message}" });
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEquipo(int id)
+        {
+            var equipo = await _context.Equipos.FindAsync(id);
+            if (equipo == null)
+            {
+                return NotFound(new { message = "Equipo no encontrado." });
+            }
+
+            try
+            {
+                _context.Equipos.Remove(equipo);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Equipo eliminado correctamente." });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { message = "No se puede borrar este equipo porque ya está asignado a un partido." });
+            }
+        }
     }
 }
