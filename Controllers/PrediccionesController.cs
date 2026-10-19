@@ -101,6 +101,23 @@ namespace ProdePrediccionesAPI.Controllers
             return Ok(misPredicciones);
         }
 
+        [HttpGet("ranking")]
+        public async Task<IActionResult> GetRanking()
+        {
+            var ranking = await _context.Usuarios
+                .Select(u => new {
+                    Nombre = u.Nombre,
+                    Puntos = _context.Predicciones
+                        .Where(p => p.UsuarioId == u.Id)
+                        .Sum(p => (int?)p.PuntosObtenidos) ?? 0
+                })
+                .OrderByDescending(r => r.Puntos)
+                .ThenBy(r => r.Nombre)
+                .ToListAsync();
+
+            return Ok(ranking);
+        }
+
 [HttpGet("usuario/{usuarioId}")]
 public async Task<ActionResult<IEnumerable<object>>> GetPrediccionesByUsuario(int usuarioId)
 {

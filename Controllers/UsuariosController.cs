@@ -31,25 +31,24 @@ namespace ProdePrediccionesAPI.Controllers
             return Ok(usuario);
         }
 
-[HttpGet("ranking")]
-public async Task<ActionResult<IEnumerable<object>>> GetRanking()
-{
-    var ranking = await _context.Usuarios
-        .Select(u => new
+        [HttpGet("ranking")]
+        public async Task<IActionResult> GetRanking()
         {
-            u.Id,
-            u.Nombre,
-            PuntosTotales = _context.Predicciones
-                .Where(p => p.UsuarioId == u.Id)
-                .Sum(p => p.PuntosObtenidos)
-        })
-        .OrderByDescending(r => r.PuntosTotales)
-        .ToListAsync();
+            var ranking = await _context.Usuarios
+                .Select(u => new {
+                    Nombre = u.Nombre,
+                    PuntosTotales = _context.Predicciones
+                        .Where(p => p.UsuarioId == u.Id)
+                        .Sum(p => (int?)p.PuntosObtenidos) ?? 0
+                })
+                .OrderByDescending(r => r.PuntosTotales)
+                .ThenBy(r => r.Nombre) 
+                .ToListAsync();
 
-    return Ok(ranking);
-}
+            return Ok(ranking);
+        }
 
-[HttpDelete("{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
@@ -67,6 +66,4 @@ public async Task<ActionResult<IEnumerable<object>>> GetRanking()
             return Ok(new { message = "Usuario y sus predicciones eliminados correctamente." });
         }
     }
-
 }
-
