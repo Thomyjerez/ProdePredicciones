@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProdePrediccionesAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f1768b510e51d5e257b526577cd0345a707ed138")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1be75ef2dd37e708d0ccb81f47d40c9a02cab82b")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProdePrediccionesAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProdePrediccionesAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
